@@ -1,4 +1,4 @@
-from Backend.app.models import character
+from app.models import character
 
 
 def simulate_turn(attacker: character, defender: character) -> dict:
@@ -10,10 +10,10 @@ def simulate_turn(attacker: character, defender: character) -> dict:
     return {
         "attacker": attacker.name,
         "defender": defender.name,
-        "damage_dealt": damage,  # Placeholder for damage calculation
-        "defender_health": health_after_attack,  # Placeholder for health update
-        "hax_used": [],
-        "is_finishing_blow": is_finishing_blow  #  Placeholder for damage calculation
+        "damage_dealt": damage,  # damage calc
+        "defender_health": health_after_attack,  # health update
+        "hax_used": [], # will be filled in later with hax logic  
+        "is_finishing_blow": is_finishing_blow  # boolean on if ending blow or not
     }
 
 def simulate_fight(character1: character, character2: character) -> dict:
