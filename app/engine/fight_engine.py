@@ -1,16 +1,36 @@
 from app.models import character
+import random
 
 
 def simulate_turn(attacker: character, defender: character) -> dict:
-    damage = max(0, attacker.strength - defender.durability)
+    hit_chance = attacker.speed / (attacker.speed + defender.speed)
+    if random.random() > hit_chance:
+        return  {
+        "attacker": attacker.name,
+        "defender": defender.name,
+        "damage_dealt": 0,
+        "defender_health": defender.health,
+        "hax_used": [],
+        "is_finishing_blow": False,
+        "missed": True
+    }
+
     
-    health_after_attack = max(0, defender.health - damage)
+    
+    base_damage = random.randint(attacker.strength - 10, attacker.strength + 10)
+    damage_redection = defender.durability * 0.5
+    final_damage = max(0, base_damage - damage_redection)
+    
+
+    health_after_attack = max(0, defender.health - final_damage)
     is_finishing_blow = health_after_attack == 0
+    
+    
 
     return {
         "attacker": attacker.name,
         "defender": defender.name,
-        "damage_dealt": damage,  # damage calc
+        "damage_dealt": final_damage,  # damage calc
         "defender_health": health_after_attack,  # health update
         "hax_used": [], # will be filled in later with hax logic  
         "is_finishing_blow": is_finishing_blow  # boolean on if ending blow or not
