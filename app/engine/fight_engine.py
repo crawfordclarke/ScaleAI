@@ -1,5 +1,6 @@
 from app.models import character
 import random
+from app.services.narrator import narrate_turn
 
 
 def simulate_turn(attacker: character, defender: character) -> dict:
@@ -27,14 +28,18 @@ def simulate_turn(attacker: character, defender: character) -> dict:
     
     
 
-    return {
+    turn_outcome = {
         "attacker": attacker.name,
         "defender": defender.name,
         "damage_dealt": final_damage,  # damage calc
         "defender_health": health_after_attack,  # health update
         "hax_used": [], # will be filled in later with hax logic  
-        "is_finishing_blow": is_finishing_blow  # boolean on if ending blow or not
+        "is_finishing_blow": is_finishing_blow, # boolean on if ending blow or not
+        "missed": False 
     }
+    
+    turn_outcome["narration"] = narrate_turn(turn_outcome)
+    return turn_outcome
 
 def simulate_fight(character1: character, character2: character) -> dict:
     turns = []
