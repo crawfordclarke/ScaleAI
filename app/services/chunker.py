@@ -1,4 +1,4 @@
-
+import re
 
 def group_list(num_sentences):
     current_start = 0
@@ -19,4 +19,15 @@ def group_list(num_sentences):
         gpl.append((last_group[0],last_group[1],current_start + 1, current_start + 2))
     return gpl
 
-print(group_list(1))
+
+def clean_raw_text(raw_text):
+    reference_index = raw_text.find("References [")
+    if reference_index != -1:
+        raw_text = raw_text[:reference_index]
+    cleaned_with_space = re.sub(r"\[[\d\s.]*\]", "", raw_text)
+    cleaned = re.sub(r"\s+", " ", cleaned_with_space)
+    return cleaned
+    
+    
+
+print(clean_raw_text())
