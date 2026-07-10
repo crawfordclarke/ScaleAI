@@ -1,4 +1,5 @@
 import re
+from nltk.tokenize import sent_tokenize
 
 def group_list(num_sentences):
     current_start = 0
@@ -29,5 +30,22 @@ def clean_raw_text(raw_text):
     return cleaned
     
     
+def chunk_text(raw_text, character_name):
+    cleaned_text = clean_raw_text(raw_text)
+    sentences = sent_tokenize(cleaned_text)
+    num_sentences = len(sentences)
+    grouped_indices = group_list(num_sentences)
+    chunks = []
+    for i,group in enumerate(grouped_indices):
+        rag_dict = {}
+        rag_dict["character_name"] = character_name
+        chunk = " ".join([sentences[idx] for idx in group])
+        rag_dict["raw_text_chunk"] = chunk
+        rag_dict["chunk_index"] = i
+        chunks.append(rag_dict)
+        
+    return chunks
+    
+    
 
-print(clean_raw_text())
+print(clean_raw_text("Your raw text here"))

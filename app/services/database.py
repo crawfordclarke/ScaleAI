@@ -20,3 +20,13 @@ def save_wiki_data(character_name, raw_text, source_url):
     cur.close()
     conn.close()
 
+def get_wiki_data(character_name):
+    conn, cur = get_database_connection()
+    cur.execute(
+        "SELECT raw_text, source_url FROM wiki_data WHERE character_name = %s",
+        (character_name,)
+    )
+    result = cur.fetchone()
+    cur.close()
+    conn.close()
+    return result
