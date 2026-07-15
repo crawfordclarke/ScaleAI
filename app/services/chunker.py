@@ -1,5 +1,10 @@
 import re
+from Backend.app.services.database import get_wiki_data
 from nltk.tokenize import sent_tokenize
+
+# TODO: leading infobox noise in first ~3 chunks, revisit if retrieval surfaces junk 
+
+
 
 def group_list(num_sentences):
     current_start = 0
@@ -48,4 +53,16 @@ def chunk_text(raw_text, character_name):
     
     
 
-print(clean_raw_text("Your raw text here"))
+
+
+if __name__ == "__main__":
+    row = get_wiki_data("Edward Newgate")
+    text = row[0]
+    result = chunk_text(text, "Edward Newgate")
+    for chunk in result[:3]:
+        print(chunk["chunk_index"], "→", chunk["raw_text_chunk"][:150])
+        print("---")
+    print(f"total chunks: {len(result)}")
+    row = get_wiki_data("Edward Newgate")
+    text = row[0]
+    print(text[:2000])

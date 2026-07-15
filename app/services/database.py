@@ -30,3 +30,14 @@ def get_wiki_data(character_name):
     cur.close()
     conn.close()
     return result
+
+def replace_character_rows(character_name, rows):
+    conn, cur = get_database_connection()
+    cur.execute("DELETE FROM rag_text WHERE character_name = %s", (character_name,))
+    cur.executemany(
+        "INSERT INTO rag_text (character_name, chunk_index, raw_text_chunk, embedding) VALUES (%s, %s, %s, %s)",
+        rows
+    )
+    conn.commit()          # one commit — both statements land together
+    cur.close()
+    conn.close()
