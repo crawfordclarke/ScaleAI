@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
-from Backend.app.services.database import get_database_connection, get_wiki_data, replace_character_rows
+from Backend.app.services.database import get_wiki_data, replace_character_rows, search_similar_chunks
 from Backend.app.services.chunker import chunk_text
 
 
@@ -37,9 +37,13 @@ def ingest_character(character_name):
         rows.append((chunk["character_name"], chunk["chunk_index"], chunk["raw_text_chunk"], vector))
     replace_character_rows(character_name, rows)
         
-    
+def retrieve_character_chunks(character_name, query, k):
+    query_vector = embed_text(query, "RETRIEVAL_QUERY")
+    results = search_similar_chunks(character_name, query_vector, k)
+    return results
+
     
 
 
 if __name__ == "__main__":
-     ingest_character("Edward Newgate")
+    print(retrieve_character_chunks("Edward Newgate", "earthquake tremor powers", 3)) 

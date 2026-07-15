@@ -31,6 +31,14 @@ def get_wiki_data(character_name):
     conn.close()
     return result
 
+def get_all_character_names():
+    conn, cur = get_database_connection()
+    cur.execute("SELECT DISTINCT character_name FROM wiki_data")
+    results = cur.fetchall()
+    cur.close()
+    conn.close()
+    return [row[0] for row in results]
+
 def replace_character_rows(character_name, rows):
     conn, cur = get_database_connection()
     cur.execute("DELETE FROM rag_text WHERE character_name = %s", (character_name,))
@@ -41,3 +49,21 @@ def replace_character_rows(character_name, rows):
     conn.commit()          # one commit — both statements land together
     cur.close()
     conn.close()
+
+
+##TODO: change ;;vector to vector type in database so the query can use <=> operator for similarity search
+
+def search_similar_chunks(character_name, query_vector, k):
+    conn, cur = get_database_connection()
+    cur.execute(
+        """SELECT raw_text_chunk
+           FROM rag_text
+           WHERE character_name = %s
+           ORDER BY embedding <=> %s::vector
+           LIMIT %s""",
+        (character_name, query_vector, k)
+    )
+    results = cur.fetchall()
+    cur.close()
+    conn.close()
+    return results
