@@ -1,10 +1,18 @@
-from app.models import character
+from Backend.app.models import character
 import random
-from app.services.narrator import narrate_turn
+from Backend.app.services.narrator import narrate_turn
+from Backend.app.services.embeddings import retrieve_character_chunks
 
 
-def simulate_turn(attacker: character, defender: character) -> dict:
+def format_chunks(chunks):
+    return "\n\n".join(chunk[0] for chunk in chunks)
+
+def simulate_turn(attacker: character, defender: character, lore: dict) -> dict:
     hit_chance = attacker.speed / (attacker.speed + defender.speed)
+    
+
+    
+    
     if random.random() > hit_chance:
         return  {
         "attacker": attacker.name,
@@ -38,14 +46,23 @@ def simulate_turn(attacker: character, defender: character) -> dict:
         "missed": False 
     }
     
-    turn_outcome["narration"] = narrate_turn(turn_outcome)
+    turn_outcome["narration"] = narrate_turn(turn_outcome, lore)
     return turn_outcome
 
 def simulate_fight(character1: character, character2: character) -> dict:
+    
+    QUERY_TEMPLATE = "{name} powers fighting style personality signature moves" 
+    
+    lore = {
+        character1.name: format_chunks(retrieve_character_chunks(character1.name, QUERY_TEMPLATE.format(name=character1.name), k=5)),
+        character2.name: format_chunks(retrieve_character_chunks(character2.name, QUERY_TEMPLATE.format(name=character2.name), k=5)),
+    }
+    
+    
     turns = []
     
     while character1.health > 0 and character2.health > 0:
-        turn_result = simulate_turn(character1, character2)
+        turn_result = simulate_turn(character1, character2, lore)
         character2.health = turn_result["defender_health"]
         turns.append(turn_result)
         
@@ -55,7 +72,7 @@ def simulate_fight(character1: character, character2: character) -> dict:
                 "turns": turns
             }
         
-        turn_result = simulate_turn(character2, character1)
+        turn_result = simulate_turn(character2, character1, lore)
         character1.health = turn_result["defender_health"]
         turns.append(turn_result)
         

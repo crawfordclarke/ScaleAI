@@ -4,7 +4,8 @@ from Backend.app.services.embeddings import ingest_character
 
 
 def main():
-    for name in get_all_character_names():
+    characters = ["Marshall D. Teach", "Minato Namikaze", "Monkey D. Luffy", "Naruto Uzumaki"]
+    for name in characters:
         print(f"Ingesting {name}...")
 
         try:

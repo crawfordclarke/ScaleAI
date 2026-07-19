@@ -1,12 +1,15 @@
 import os
 from dotenv import load_dotenv
 import psycopg2
+from pgvector.psycopg2 import register_vector
 
 load_dotenv() 
 
 
 def get_database_connection():    
     conn = psycopg2.connect(os.getenv("DATABASE_URL"))
+    #register_vector lets psycopg2 adapt python lists to the vector type automatically
+    register_vector(conn)
     cur = conn.cursor()
     return conn, cur
 
@@ -51,16 +54,14 @@ def replace_character_rows(character_name, rows):
     conn.close()
 
 
-##TODO: change ;;vector to vector type in database so the query can use <=> operator for similarity search
-
 def search_similar_chunks(character_name, query_vector, k):
     conn, cur = get_database_connection()
     cur.execute(
         """SELECT raw_text_chunk
            FROM rag_text
            WHERE character_name = %s
-           ORDER BY embedding <=> %s::vector
-           LIMIT %s""",
+           ORDER BY embedding <=> %s
+           LIMIT %s""",         # no ::vector cast needed, register_vector handles the type
         (character_name, query_vector, k)
     )
     results = cur.fetchall()
