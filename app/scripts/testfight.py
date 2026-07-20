@@ -1,3 +1,5 @@
+import json
+
 from Backend.app.models.character import Character
 from Backend.app.engine.fight_engine import simulate_fight
 
@@ -12,9 +14,16 @@ c2 = Character(
     intelligence=75, durability=85, hax=[]
 )
 
-result = simulate_fight(c1, c2)
-print(f"Winner: {result['winner']}\n")
-for i, turn in enumerate(result["turns"], 1):
-    print(f"--- Turn {i} ---")
-    print(turn.get("narration", "(miss — no narration)"))
-    print()
+for line in simulate_fight(c1, c2):
+    data = json.loads(line)
+
+    if data["event"] == "turn":
+        print(f"[{data['attacker']} -> {data['defender']}] "
+              f"dmg {data['damage_dealt']}, "
+              f"{data['defender']} at {data['defender_health']}")
+        print(data["narration"])
+        print()
+    elif data["event"] == "fight_over":
+        winner = data["winner"]
+        print("=" * 40)
+        print(f"Winner: {winner}" if winner else "Draw — turn cap reached")

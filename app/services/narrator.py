@@ -1,4 +1,6 @@
 import json
+import time
+from google.genai import errors
 from google import genai
 import os
 from dotenv import load_dotenv
@@ -36,8 +38,13 @@ def narrate_turn(turn_data: dict, lore: dict) -> str:
     Narrate this single turn in 2-3 sentences. Be dramatic and lore-accurate.
     End on a cliffhanger if HP is low."""
         
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt
-    )
-    return response.text
+    for attempt in range(3):
+        try:
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt
+            )
+            return response.text
+        except errors.ClientError:
+            time.sleep(15)
+    raise Exception("narration failed after 3 attempts")

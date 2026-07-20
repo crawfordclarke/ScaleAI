@@ -1,7 +1,14 @@
+from typing import Iterator
+
 from Backend.app.models import character
 import random
 from Backend.app.services.narrator import narrate_turn
 from Backend.app.services.embeddings import retrieve_character_chunks
+import json
+
+
+
+def event(payload): return json.dumps(payload) + "\n"
 
 
 def format_chunks(chunks):
@@ -14,7 +21,8 @@ def simulate_turn(attacker: character, defender: character, lore: dict) -> dict:
     
     
     if random.random() > hit_chance:
-        return  {
+        turn_outcome = {
+        "event": "turn",    
         "attacker": attacker.name,
         "defender": defender.name,
         "damage_dealt": 0,
@@ -22,7 +30,9 @@ def simulate_turn(attacker: character, defender: character, lore: dict) -> dict:
         "hax_used": [],
         "is_finishing_blow": False,
         "missed": True
-    }
+        }
+        turn_outcome["narration"] = narrate_turn(turn_outcome, lore)
+        return turn_outcome
 
     
     
@@ -37,6 +47,7 @@ def simulate_turn(attacker: character, defender: character, lore: dict) -> dict:
     
 
     turn_outcome = {
+        "event": "turn",
         "attacker": attacker.name,
         "defender": defender.name,
         "damage_dealt": final_damage,  # damage calc
@@ -49,7 +60,9 @@ def simulate_turn(attacker: character, defender: character, lore: dict) -> dict:
     turn_outcome["narration"] = narrate_turn(turn_outcome, lore)
     return turn_outcome
 
-def simulate_fight(character1: character, character2: character) -> dict:
+def simulate_fight(character1: character, character2: character) -> Iterator[str]:
+    MAX_TURNS = 50  # Prevent infinite loops in case of a bug
+    turn_counter = 0
     
     QUERY_TEMPLATE = "{name} powers fighting style personality signature moves" 
     
@@ -59,26 +72,27 @@ def simulate_fight(character1: character, character2: character) -> dict:
     }
     
     
-    turns = []
+    ##turns = []
     
-    while character1.health > 0 and character2.health > 0:
+    while character1.health > 0 and character2.health > 0 and turn_counter < MAX_TURNS:
         turn_result = simulate_turn(character1, character2, lore)
         character2.health = turn_result["defender_health"]
-        turns.append(turn_result)
-        
+        yield event(turn_result)
+        turn_counter += 1
+
         if character2.health <= 0:
-            return {
-                "winner": character1.name,
-                "turns": turns
-            }
+            break
         
         turn_result = simulate_turn(character2, character1, lore)
         character1.health = turn_result["defender_health"]
-        turns.append(turn_result)
+        yield event(turn_result)
+        turn_counter += 1
+    
+    if character1.health <= 0:
+        winner = character2.name
+    elif character2.health <= 0:
+        winner = character1.name
+    else:
+        winner = None 
         
-        if character1.health <= 0:
-            return {
-                "winner": character2.name,
-                "turns": turns
-            }
-    return None
+    yield event({"event": "fight_over", "winner": winner})
