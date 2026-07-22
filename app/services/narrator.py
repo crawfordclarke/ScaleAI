@@ -45,6 +45,6 @@ def narrate_turn(turn_data: dict, lore: dict) -> str:
                 contents=prompt
             )
             return response.text
-        except errors.ClientError:
+        except errors.APIError:
             time.sleep(15)
     raise Exception("narration failed after 3 attempts")

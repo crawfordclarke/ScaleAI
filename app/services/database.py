@@ -1,4 +1,5 @@
 import os
+from Backend.app.models.character import Character
 from dotenv import load_dotenv
 import psycopg2
 from pgvector.psycopg2 import register_vector
@@ -68,3 +69,31 @@ def search_similar_chunks(character_name, query_vector, k):
     cur.close()
     conn.close()
     return results
+
+def get_character(character_id: int) -> Character | None:
+    conn, cur = get_database_connection()
+    cur.execute(
+        "SELECT character_id, name, franchise, description, image_url, "
+        "strength, speed, intelligence, durability "
+        "FROM characters WHERE character_id = %s",
+        (character_id,)
+    )
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    
+    if row is None:
+        return None
+
+    return Character(
+        character_id=row[0],
+        name=row[1],
+        franchise=row[2],
+        description=row[3],
+        image_url=row[4],
+        strength=row[5],
+        speed=row[6],
+        intelligence=row[7],
+        durability=row[8],
+    )
+    

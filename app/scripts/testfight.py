@@ -2,17 +2,10 @@ import json
 
 from Backend.app.models.character import Character
 from Backend.app.engine.fight_engine import simulate_fight
+from Backend.app.services.database import get_character
 
-c1 = Character(
-    character_id=1, franchise="One Piece", name="Edward Newgate",
-    description="", image_url="", strength=95, speed=70,
-    intelligence=80, durability=90, hax=[]
-)
-c2 = Character(
-    character_id=2, franchise="Dragon Ball", name="Goku",
-    description="", image_url="", strength=90, speed=95,
-    intelligence=75, durability=85, hax=[]
-)
+c1 = get_character(1)
+c2 = get_character(2)
 
 for line in simulate_fight(c1, c2):
     data = json.loads(line)
