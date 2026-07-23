@@ -19,6 +19,7 @@ class FightRequest(BaseModel):
     character1_id: int
     character2_id: int
     
-    
-    
-    
+class CharacterSummary(BaseModel):
+    character_id: int
+    franchise: str
+    name: str

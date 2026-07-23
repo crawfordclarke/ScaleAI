@@ -1,5 +1,5 @@
 import os
-from Backend.app.models.character import Character
+from Backend.app.models.character import Character, CharacterSummary
 from dotenv import load_dotenv
 import psycopg2
 from pgvector.psycopg2 import register_vector
@@ -96,4 +96,23 @@ def get_character(character_id: int) -> Character | None:
         intelligence=row[7],
         durability=row[8],
     )
-    
+
+def get_all_characters() -> list[CharacterSummary]:
+    conn, cur = get_database_connection()
+    cur.execute(
+        "SELECT character_id, name, franchise "
+        
+        "FROM characters"
+    )
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    return [
+        CharacterSummary(
+            character_id=row[0],
+            name=row[1],
+            franchise=row[2],
+        )
+        for row in rows
+    ]
