@@ -15,6 +15,10 @@ class Character(BaseModel):
     health: int  = 100
     max_health: int = 100
     
+class FightRequest(BaseModel):
+    character1_id: int
+    character2_id: int
+    
     
     
     
