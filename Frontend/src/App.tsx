@@ -7,11 +7,22 @@ type Character = {
   franchise: string
 }
 
+
+type Turn = {
+    event: string
+    attacker?: string
+    defender?: string
+    damage_dealt?: number
+    defender_health?: number
+    winner?: string|null
+
+}
+
 function App() {
   const [characters, setCharacters] = useState<Character[]>([])
   const [fighter1Id, setFighter1Id] = useState<number | null>(null)
   const [fighter2Id, setFighter2Id] = useState<number | null>(null)
-  const [result, setResult] = useState<string>("")
+    const [turns, setTurns] = useState<Turn[]>([])
 
 
   useEffect(() => {  fetch("http://localhost:8000/characters")
@@ -19,12 +30,35 @@ function App() {
       .then(data => setCharacters(data)) }, [])
 
 
-  const startFight = () => {fetch("http://localhost:8000/fight", {
+  const startFight = async () => {
+      setTurns([])
+      const response = await fetch("http://localhost:8000/fight", {
       method: "POST",
       headers: {"Content-Type" : "application/json"},
       body: JSON.stringify({character1_id: fighter1Id, character2_id: fighter2Id})
-  }).then(response => response.text())
-      .then(text => setResult(text))}
+  })
+        const reader = response.body!.getReader()
+        const decoder = new TextDecoder()
+        let buffer = ""
+
+        while (true) {
+            const { value, done } = await reader.read()
+            if (done) break
+            buffer += decoder.decode(value, { stream: true })
+            const lines = buffer.split("\n")
+            buffer = lines.pop()!
+            for(const line of lines) {
+                const turn = JSON.parse(line)
+                setTurns(prev => [...prev, turn])
+            }
+        }
+
+
+
+
+
+        }
+
 
 
   return (
@@ -53,7 +87,16 @@ function App() {
             >
                 Fight!
             </button>
-        </div><pre>{result}</pre>
+        </div>
+        <div>
+          {turns.map((turn, i) => (
+              <p key={i}>
+                  {turn.event === "fight_over"
+                      ? `Winner: ${turn.winner ?? "Draw"}`
+                      : `${turn.attacker} hits ${turn.defender} for ${turn.damage_dealt}`}
+              </p>
+          ))}
+        </div>
       </div>
 
 
