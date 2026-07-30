@@ -15,7 +15,7 @@ def format_chunks(chunks):
     return "\n\n".join(chunk[0] for chunk in chunks)
 
 def simulate_turn(attacker: character, defender: character, lore: dict) -> dict:
-    hit_chance = attacker.speed / (attacker.speed + defender.speed)
+    hit_chance = 0.5 + (attacker.speed / (attacker.speed + defender.speed)) * 0.4
     
 
     
