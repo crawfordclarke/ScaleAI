@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import './App.css'
+import './index.css'
 
 type Character = {
   character_id: number
@@ -15,6 +16,11 @@ type Turn = {
     damage_dealt?: number
     defender_health?: number
     winner?: string|null
+    narration?: string
+    fighter1?: string
+    fighter1_max_health?: number
+    fighter2?: string
+    fighter2_max_health?: number
 
 }
 
@@ -23,7 +29,7 @@ function App() {
   const [fighter1Id, setFighter1Id] = useState<number | null>(null)
   const [fighter2Id, setFighter2Id] = useState<number | null>(null)
     const [turns, setTurns] = useState<Turn[]>([])
-
+    const [max_health, setMaxHealth] = useState<{fighter1:number; fighter2: number} | null>(null)
 
   useEffect(() => {  fetch("http://localhost:8000/characters")
       .then(response => response.json())
@@ -49,7 +55,12 @@ function App() {
             buffer = lines.pop()!
             for(const line of lines) {
                 const turn = JSON.parse(line)
-                setTurns(prev => [...prev, turn])
+                console.log(turn)
+                if(turn.event === "fight_start") {
+                    setMaxHealth({fighter1: turn.fighter1_max_health, fighter2: turn.fighter2_max_health})
+                }else{
+                    setTurns(prev => [...prev, turn])
+                }
             }
         }
 
@@ -62,9 +73,11 @@ function App() {
 
 
   return (
-      <div>
-        <h1>ScaleAI</h1>
-        <select value={fighter1Id ?? ""} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFighter1Id(Number(e.target.value))}>
+      <div className="min-h-screen bg-scale-paper">
+      <div className="max-w-3xl mx-auto text-center flex flex-col gap-4">
+        <h1 className="font-display text-scale-red text-5xl -skew-x-6 tracking-[3px] [-webkit-text-stroke:1.5px_black]">ScaleAI</h1>
+        <div className="flex items-center justify-center gap-4">
+        <select className='border-2 border-scale-ink rounded-lg px-4 py-2 font-body bg-scale-paper text-scale-ink' value={fighter1Id ?? ""} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFighter1Id(Number(e.target.value))}>
             <option value="" disabled>— Select a fighter —</option>
           {characters.map(character => (
               <option key={character.character_id} value={character.character_id}>
@@ -72,7 +85,11 @@ function App() {
               </option>
           ))}
         </select>
-        <select value={fighter2Id ?? ""} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFighter2Id(Number(e.target.value))}>
+
+        <span className='font-display text-3xl -rotate-6'>
+            VS
+        </span>
+        <select className='border-2 border-scale-ink rounded-lg px-4 py-2 font-body bg-scale-paper text-scale-ink' value={fighter2Id ?? ""} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFighter2Id(Number(e.target.value))}>
             <option value="" disabled>— Select a fighter —</option>
           {characters.map(character => (
               <option key={character.character_id} value={character.character_id}>
@@ -80,27 +97,33 @@ function App() {
               </option>
           ))}
         </select>
-        <p>Fighter 1: {fighter1Id} | Fighter 2: {fighter2Id}</p>
+        </div>
         <div>
-            <button disabled={fighter1Id== null || fighter2Id ==null}
+            <button className="border-2 border-scale-ink rounded-lg px-4 py-2 font-body bg-scale-paper text-scale-ink hover:bg-gray-200 transition-colors" disabled={fighter1Id== null || fighter2Id ==null}
                     onClick={startFight}
             >
                 Fight!
             </button>
         </div>
-        <div>
-          {turns.map((turn, i) => (
-              <p key={i}>
-                  {turn.event === "fight_over"
-                      ? `Winner: ${turn.winner ?? "Draw"}`
-                      : `${turn.attacker} hits ${turn.defender} for ${turn.damage_dealt}`}
-              </p>
-          ))}
+          <div className="flex flex-col gap-2">
+              {turns.map((turn, i) => (
+                  <div key={i} className="border-2 border-scale-ink rounded-2xl px-4 py-3 flex items-center justify-between font-body animate-slide-in">
+                      {turn.event === "fight_over" ? (
+                          <span className="w-full text-center">Winner: {turn.winner ?? "Draw"}</span>
+                      ) : (
+                          <>
+                              <span>{turn.narration ?? `${turn.attacker} hits ${turn.defender}`}</span>
+                              <span className="font-display text-2xl text-scale-amber">-{turn.damage_dealt}</span>
+                          </>
+                      )}
+                  </div>
+              ))}
+          </div>
         </div>
       </div>
+  )}
 
 
-  )
-}
 
-export default App
+
+export default App;

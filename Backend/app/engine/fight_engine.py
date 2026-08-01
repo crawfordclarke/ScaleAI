@@ -61,6 +61,10 @@ def simulate_turn(attacker: character, defender: character, lore: dict) -> dict:
     return turn_outcome
 
 def simulate_fight(character1: character, character2: character) -> Iterator[str]:
+    yield event({"event": "fight_start", "fighter1": character1.name, "fighter1_max_health": character1.max_health, "fighter2": character2.name, "fighter2_max_health": character2.max_health})
+    
+    
+    
     MAX_TURNS = 50  # Prevent infinite loops in case of a bug
     turn_counter = 0
     
