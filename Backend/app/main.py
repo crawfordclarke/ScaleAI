@@ -10,7 +10,7 @@ app.include_router(character_router)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["http://localhost:5173", "https://scale-ai-delta.vercel.app"],
     allow_methods=["*"],
     allow_headers=["*"],
 )

@@ -36,7 +36,7 @@ function App() {
     const [fighter2, setFighter2] = useState<Character | undefined>(undefined)
     const logReff = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {  fetch("http://localhost:8000/characters")
+  useEffect(() => {  fetch(`${import.meta.env.VITE_API_URL}/characters`)
       .then(response => response.json())
       .then(data => setCharacters(data)) }, [])
 
@@ -50,7 +50,7 @@ function App() {
       setFighter2(foundFighter2)
 
       setTurns([])
-      const response = await fetch("http://localhost:8000/fight", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/fight`, {
       method: "POST",
       headers: {"Content-Type" : "application/json"},
       body: JSON.stringify({character1_id: fighter1Id, character2_id: fighter2Id})
