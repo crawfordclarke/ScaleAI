@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 
 class Character(BaseModel):
     character_id: int
@@ -23,3 +23,4 @@ class CharacterSummary(BaseModel):
     character_id: int
     franchise: str
     name: str
+    image_url: Optional[str] | None = None

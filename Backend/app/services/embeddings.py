@@ -3,8 +3,8 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types, errors
 from pgvector import Vector
-from Backend.app.services.database import get_wiki_data, replace_character_rows, search_similar_chunks
-from Backend.app.services.chunker import chunk_text
+from app.services.database import get_wiki_data, replace_character_rows, search_similar_chunks
+from app.services.chunker import chunk_text
 from pgvector import Vector
 import time 
 

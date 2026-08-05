@@ -1,8 +1,8 @@
-from Backend.app.models.character import FightRequest
-from Backend.app.services.database import get_character
+from app.models.character import FightRequest
+from app.services.database import get_character
 from fastapi import APIRouter ,HTTPException
 from fastapi.responses import StreamingResponse
-from Backend.app.engine.fight_engine import simulate_fight
+from app.engine.fight_engine import simulate_fight
 
 
 router = APIRouter()

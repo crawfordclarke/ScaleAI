@@ -1,5 +1,5 @@
 import re
-from Backend.app.services.database import get_wiki_data
+from app.services.database import get_wiki_data
 from nltk.tokenize import sent_tokenize
 
 # TODO: leading infobox noise in first ~3 chunks, revisit if retrieval surfaces junk 

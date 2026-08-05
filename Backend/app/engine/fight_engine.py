@@ -1,9 +1,9 @@
 from typing import Iterator
 
-from Backend.app.models import character
+from app.models import character
 import random
-from Backend.app.services.narrator import narrate_turn
-from Backend.app.services.embeddings import retrieve_character_chunks
+from app.services.narrator import narrate_turn
+from app.services.embeddings import retrieve_character_chunks
 import json
 
 
@@ -38,7 +38,7 @@ def simulate_turn(attacker: character, defender: character, lore: dict) -> dict:
     
     base_damage = random.randint(attacker.strength - 10, attacker.strength + 10)
     damage_redection = defender.durability * 0.5
-    final_damage = max(0, base_damage - damage_redection)
+    final_damage =round(max(0, base_damage - damage_redection))
     
 
     health_after_attack = max(0, defender.health - final_damage)

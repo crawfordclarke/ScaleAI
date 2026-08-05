@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from Backend.app.models.character import CharacterSummary
-from Backend.app.services.database import get_all_characters
+from app.models.character import CharacterSummary
+from app.services.database import get_all_characters
 
 router = APIRouter()
 

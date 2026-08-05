@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from Backend.app.routes.fight import fight, router as fight_router
-from Backend.app.routes.characters import router as character_router
+from app.routes.fight import fight, router as fight_router
+from app.routes.characters import router as character_router
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()

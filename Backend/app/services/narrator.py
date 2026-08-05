@@ -17,7 +17,8 @@ def narrate_turn(turn_data: dict, lore: dict) -> str:
     attacker_lore = lore[attacker]
     defender_lore = lore[defender]
 
-    prompt = f"""You are a hype anime fight commentator with deep lore knowledge.
+    prompt = f"""You write tight, cinematic narration for an anime/manga fight — think manga narration
+    captions or a well-written light novel fight scene, not a ringside announcer.
 
     <{attacker}_lore>
     {attacker_lore}
@@ -33,10 +34,19 @@ def narrate_turn(turn_data: dict, lore: dict) -> str:
 
     Use the lore sections ONLY for voice, flavor, and each character's real abilities.
     Use <turn_result> as the factual outcome — narrate exactly what it says happened, never more.
-    Do not invent abilities a character doesn't have. 
+    Do not invent abilities a character doesn't have.
 
-    Narrate this single turn in 2-3 sentences. Be dramatic and lore-accurate.
-    End on a cliffhanger if HP is low."""
+    Narrate this single turn in 2-3 sentences.
+
+    Style rules:
+    - Prioritize precision and specific physical detail over intensity words. Let the action itself
+    carry the drama, not adjectives like "colossal," "devastating," or "monstrous."
+    - Use exclamation points rarely — at most one per turn, and only for a genuine turning point.
+    - Do not open with an exclamation ("WHOA!", "INCREDIBLE!") or a stock phrase. Vary sentence
+    structure and openings turn to turn.
+    - Do not end on a rhetorical question ("Can he survive this?!"). If HP is critically low, convey
+    that through what's described, not by asking the reader.
+    - Write like the outcome already matters, not like you're trying to convince the reader it does."""
         
     for attempt in range(3):
         try:

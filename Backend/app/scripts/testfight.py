@@ -1,8 +1,8 @@
 import json
 
-from Backend.app.models.character import Character
-from Backend.app.engine.fight_engine import simulate_fight
-from Backend.app.services.database import get_character
+from app.models.character import Character
+from app.engine.fight_engine import simulate_fight
+from app.services.database import get_character
 
 c1 = get_character(1)
 c2 = get_character(2)

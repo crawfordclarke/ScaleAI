@@ -1,5 +1,5 @@
 import os
-from Backend.app.models.character import Character, CharacterSummary
+from app.models.character import Character, CharacterSummary
 from dotenv import load_dotenv
 import psycopg2
 from pgvector.psycopg2 import register_vector
@@ -100,7 +100,7 @@ def get_character(character_id: int) -> Character | None:
 def get_all_characters() -> list[CharacterSummary]:
     conn, cur = get_database_connection()
     cur.execute(
-        "SELECT character_id, name, franchise "
+        "SELECT character_id, name, franchise, image_url "
         
         "FROM characters"
     )
@@ -113,6 +113,7 @@ def get_all_characters() -> list[CharacterSummary]:
             character_id=row[0],
             name=row[1],
             franchise=row[2],
+            image_url=row[3]
         )
         for row in rows
     ]

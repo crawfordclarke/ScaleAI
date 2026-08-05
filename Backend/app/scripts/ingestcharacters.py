@@ -1,6 +1,6 @@
 
-from Backend.app.services.database import get_all_character_names
-from Backend.app.services.embeddings import ingest_character
+from app.services.database import get_all_character_names
+from app.services.embeddings import ingest_character
 
 
 def main():

@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-from Backend.app.services.database import save_wiki_data
+from app.services.database import save_wiki_data
 
 def naruto_scrape_character(character_name: str):
     format_character_name = character_name.replace(" ", "_")
