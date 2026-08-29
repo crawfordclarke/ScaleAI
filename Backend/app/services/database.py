@@ -117,3 +117,30 @@ def get_all_characters() -> list[CharacterSummary]:
         )
         for row in rows
     ]
+    
+def cast_vote(character_a_id: int, character_b_id: int, accurate: bool):
+    conn, cur = get_database_connection()
+    cur.execute(
+        "INSERT INTO votes (character_a_id, character_b_id, accurate) VALUES (%s, %s, %s)",
+        (character_a_id, character_b_id, accurate)
+    )
+    conn.commit()
+    cur.close()
+    conn.close()
+
+
+def get_votes(character_a_id: int, character_b_id: int):
+    conn, cur = get_database_connection()
+    cur.execute(
+        """SELECT
+               COUNT(*) FILTER (WHERE accurate) AS accurate,
+               COUNT(*) FILTER (WHERE NOT accurate) AS inaccurate
+           FROM votes
+           WHERE (character_a_id = %s AND character_b_id = %s)
+              OR (character_a_id = %s AND character_b_id = %s)""",
+        (character_a_id, character_b_id, character_b_id, character_a_id)
+    )
+    row = cur.fetchone()
+    cur.close()
+    conn.close()
+    return {"accurate": row[0], "inaccurate": row[1]}    
