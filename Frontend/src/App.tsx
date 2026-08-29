@@ -1,6 +1,8 @@
 import {useState, useEffect, useRef} from 'react'
 import './App.css'
 import './index.css'
+import VoteWidget from "./components/VoteWidget.tsx";
+
 
 type Character = {
   character_id: number
@@ -171,6 +173,9 @@ function App() {
                   </div>
               ))}
           </div>
+          {fighter1Id !== null && fighter2Id !== null && turns.some(t => t.event === "fight_over") && (
+              <VoteWidget characterAId={fighter1Id} characterBId={fighter2Id} />
+          )}
         </div>
       </div>
   )}
