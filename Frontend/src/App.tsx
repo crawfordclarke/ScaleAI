@@ -96,11 +96,12 @@ function App() {
 
 
   return (
-      <div className="min-h-screen bg-scale-paper">
+      <div className="min-h-screen bg-scale-paper px-4">
       <div className="max-w-3xl mx-auto text-center flex flex-col gap-4">
-        <h1 className="font-display text-scale-red text-5xl -skew-x-6 tracking-[3px] [-webkit-text-stroke:1.5px_black]">ScaleAI</h1>
-        <div className="flex items-center justify-center gap-4">
-        <select className='border-2 border-scale-ink rounded-lg px-4 py-2 font-body bg-scale-paper text-scale-ink' value={fighter1Id ?? ""} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFighter1Id(Number(e.target.value))}>
+        <h1 className="font-display text-scale-red text-3xl sm:text-5xl -skew-x-6 tracking-[3px] [-webkit-text-stroke:1.5px_black]">ScaleAI</h1>
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <select className='w-full sm:w-auto border-2 border-scale-ink rounded-lg px-4 py-2 font-body bg-scale-paper text-scale-ink' value={fighter1Id ?? ""} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFighter1Id(Number(e.target.value))}>
             <option value="" disabled>— Select a fighter —</option>
           {characters.map(character => (
               <option key={character.character_id} value={character.character_id}>
@@ -112,7 +113,7 @@ function App() {
         <span className='font-display text-3xl -rotate-6'>
             VS
         </span>
-        <select className='border-2 border-scale-ink rounded-lg px-4 py-2 font-body bg-scale-paper text-scale-ink' value={fighter2Id ?? ""} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFighter2Id(Number(e.target.value))}>
+        <select className='w-full sm:w-auto border-2 border-scale-ink rounded-lg px-4 py-2 font-body bg-scale-paper text-scale-ink' value={fighter2Id ?? ""} onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFighter2Id(Number(e.target.value))}>
             <option value="" disabled>— Select a fighter —</option>
           {characters.map(character => (
               <option key={character.character_id} value={character.character_id}>
@@ -130,12 +131,12 @@ function App() {
         </div>
           {currentHealth && max_health && (
               <div className="sticky top-0 z-10 bg-scale-paper py-2 flex gap-4">
-                  <div className='flex-1'>
+                  <div className='flex-1 min-w-0'>
                       <div className='flex items-center gap-2 justify-center'>
                           {fighter1?.image_url &&(
-                              <img src={fighter1.image_url} alt={fighter1.name} className="h-12 w-12 object-cover object-top rounded-full border-2 border-scale-red" />
+                              <img src={fighter1.image_url} alt={fighter1.name} className="h-10 w-10 sm:h-12 sm:w-12 shrink-0 object-cover object-top rounded-full border-2 border-scale-red" />
                       )}
-                          <span>{fighter1?.name}</span>
+                          <span className="truncate">{fighter1?.name}</span>
                       </div>
                       <div className="w-full h-[6px] bg-gray-700 rounded">
                           <div
@@ -144,12 +145,12 @@ function App() {
                           />
                       </div>
                   </div>
-                  <div className='flex-1'>
+                  <div className='flex-1 min-w-0'>
                       <div className='flex items-center gap-2 justify-center'>
                           {fighter2?.image_url && (
-                              <img src={fighter2.image_url} alt={fighter2.name} className="h-12 w-12 object-cover object-top rounded-full border-2 border-scale-blue" />
+                              <img src={fighter2.image_url} alt={fighter2.name} className="h-10 w-10 sm:h-12 sm:w-12 shrink-0 object-cover object-top rounded-full border-2 border-scale-blue" />
                           )}
-                          <span>{fighter2?.name}</span>
+                          <span className="truncate">{fighter2?.name}</span>
                       </div>
                       <div className="w-full h-[6px] bg-gray-700 rounded">
                           <div
@@ -161,13 +162,13 @@ function App() {
               </div>)}
           <div ref={logReff} className="max-h-[400px] overflow-y-auto flex flex-col gap-2">
               {turns.map((turn, i) => (
-                  <div key={i} className="border-2 border-scale-ink rounded-2xl px-4 py-3 flex items-center justify-between font-body animate-slide-in">
+                  <div key={i} className="border-2 border-scale-ink rounded-2xl px-4 py-3 flex items-center justify-between gap-2 font-body animate-slide-in">
                       {turn.event === "fight_over" ? (
                           <span className="w-full text-center">Winner: {turn.winner ?? "Draw"}</span>
                       ) : (
                           <>
-                              <span>{turn.narration ?? `${turn.attacker} hits ${turn.defender}`}</span>
-                              <span className="font-display text-2xl text-scale-amber">-{turn.damage_dealt}</span>
+                              <span className="min-w-0 break-words">{turn.narration ?? `${turn.attacker} hits ${turn.defender}`}</span>
+                              <span className="shrink-0 font-display text-2xl text-scale-amber">-{turn.damage_dealt}</span>
                           </>
                       )}
                   </div>
