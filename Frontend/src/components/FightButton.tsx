@@ -26,7 +26,12 @@ function FightButton({ ready, isFighting, onClick }: FightButtonProps) {
         animate={animate}
         transition={looping ? { duration: isFighting ? 0.8 : 1.4, repeat: Infinity, ease: "easeInOut" } : { duration: 0.3 }}
         whileTap={{ scale: 0.85 }}
-        className="px-6 py-2 font-title text-4xl sm:text-5xl text-scale-red tracking-[2px] [-webkit-text-stroke:1.5px_black] disabled:cursor-not-allowed"
+        // Shrinks to a small status line mid-fight so the narration gets the space
+        className={`font-title text-scale-red disabled:cursor-not-allowed ${
+          isFighting
+            ? "px-2 text-sm sm:text-base tracking-[1px]"
+            : "px-6 py-2 text-4xl sm:text-5xl tracking-[2px] [-webkit-text-stroke:1.5px_black]"
+        }`}
       >
         {/* Skew on an inner span so it doesn't clash with Motion's scale on the button */}
         <span className="inline-block -skew-x-12">{isFighting ? "FIGHTING…" : "FIGHT!"}</span>
