@@ -6,6 +6,7 @@
 @theme {
   --font-display: 'bebas Neue', sans-serif;
   --font-body: 'inter', sans-serif;
+  --font-title: 'Dela Gothic One', sans-serif;
 
 
   --color-scale-red: #E8352B;
@@ -34,5 +35,6 @@
 body {
   margin: 0;
   color: var(--color-scale-ink);
+  background-color: var(--color-scale-paper);
 }
 

@@ -1,45 +1,21 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 import "./index.css";
 import VoteWidget from "./components/VoteWidget.tsx";
-
-type Character = {
-  character_id: number;
-  name: string;
-  franchise: string;
-  image_url: string;
-};
-
-type Turn = {
-  event: string;
-  attacker?: string;
-  defender?: string;
-  damage_dealt?: number;
-  defender_health?: number;
-  winner?: string | null;
-  narration?: string;
-  fighter1?: string;
-  fighter1_max_health?: number;
-  fighter2?: string;
-  fighter2_max_health?: number;
-};
+import FighterSelect from "./components/FighterSelect.tsx";
+import HealthBars from "./components/HealthBars.tsx";
+import FightLog from "./components/FightLog.tsx";
+import InkBackground from "./components/InkBackground.tsx";
+import Title from "./components/Title.tsx";
+import { useFight } from "./hooks/useFight.ts";
+import type { Character } from "./types.ts";
 
 function App() {
   const [characters, setCharacters] = useState<Character[]>([]);
   const [fighter1Id, setFighter1Id] = useState<number | null>(null);
   const [fighter2Id, setFighter2Id] = useState<number | null>(null);
-  const [turns, setTurns] = useState<Turn[]>([]);
-  const [max_health, setMaxHealth] = useState<{
-    fighter1: number;
-    fighter2: number;
-  } | null>(null);
-  const [currentHealth, setCurrentHealth] = useState<{
-    fighter1: number;
-    fighter2: number;
-  } | null>(null);
-  const [fighter1, setFighter1] = useState<Character | undefined>(undefined);
-  const [fighter2, setFighter2] = useState<Character | undefined>(undefined);
-  const logReff = useRef<HTMLDivElement>(null);
+  const { turns, maxHealth, currentHealth, fighter1, fighter2, lastHit, isFighting, startFight } =
+    useFight();
 
   useEffect(() => {
     fetch(`${import.meta.env.VITE_API_URL}/characters`)
@@ -47,201 +23,48 @@ function App() {
       .then((data) => setCharacters(data));
   }, []);
 
-  useEffect(() => {
-    if (logReff.current) {
-      logReff.current.scrollTop = logReff.current.scrollHeight;
-    }
-  }, [turns]);
-
-  const startFight = async () => {
-    const foundFighter1 = characters.find((c) => c.character_id === fighter1Id);
-    const foundFighter2 = characters.find((c) => c.character_id === fighter2Id);
-    setFighter1(foundFighter1);
-    setFighter2(foundFighter2);
-
-    setTurns([]);
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/fight`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        character1_id: fighter1Id,
-        character2_id: fighter2Id,
-      }),
-    });
-
-    const reader = response.body!.getReader();
-    const decoder = new TextDecoder();
-    let buffer = "";
-
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split("\n");
-      buffer = lines.pop()!;
-      for (const line of lines) {
-        const turn = JSON.parse(line);
-        console.log(turn);
-        if (turn.event === "fight_start") {
-          setMaxHealth({
-            fighter1: turn.fighter1_max_health,
-            fighter2: turn.fighter2_max_health,
-          });
-          setCurrentHealth({
-            fighter1: turn.fighter1_max_health,
-            fighter2: turn.fighter2_max_health,
-          });
-        } else {
-          setTurns((prev) => [...prev, turn]);
-          if (turn.defender === foundFighter1?.name) {
-            setCurrentHealth((prev) => {
-              if (prev === null) return prev;
-              return { ...prev, fighter1: turn.defender_health };
-            });
-          } else if (turn.defender === foundFighter2?.name) {
-            setCurrentHealth((prev) => {
-              if (prev === null) return prev;
-              return { ...prev, fighter2: turn.defender_health };
-            });
-          }
-        }
-      }
-    }
+  const handleFight = () => {
+    const found1 = characters.find((c) => c.character_id === fighter1Id);
+    const found2 = characters.find((c) => c.character_id === fighter2Id);
+    if (found1 && found2) startFight(found1, found2);
   };
 
+  const fightOver = turns.some((t) => t.event === "fight_over");
+
   return (
-    <div className="min-h-screen bg-scale-paper px-4">
+    <div className="min-h-screen px-4">
+      <InkBackground fighter1={fighter1} fighter2={fighter2} lastHit={lastHit} />
       <div className="max-w-3xl mx-auto text-center flex flex-col gap-4">
-        <h1 className="font-display text-scale-red text-3xl sm:text-5xl -skew-x-6 tracking-[3px] [-webkit-text-stroke:1.5px_black]">
-          ScaleAI
-        </h1>
+        <Title lastHit={lastHit} />
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <select
-            className="w-full sm:w-auto border-2 border-scale-ink rounded-lg px-4 py-2 font-body bg-scale-paper text-scale-ink"
-            value={fighter1Id ?? ""}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-              setFighter1Id(Number(e.target.value))
-            }
-          >
-            <option value="" disabled>
-              — Select a fighter —
-            </option>
-            {characters.map((character) => (
-              <option
-                key={character.character_id}
-                value={character.character_id}
-              >
-                {character.name}
-              </option>
-            ))}
-          </select>
-
+          <FighterSelect characters={characters} value={fighter1Id} onChange={setFighter1Id} />
           <span className="font-display text-3xl -rotate-6">VS</span>
-          <select
-            className="w-full sm:w-auto border-2 border-scale-ink rounded-lg px-4 py-2 font-body bg-scale-paper text-scale-ink"
-            value={fighter2Id ?? ""}
-            onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
-              setFighter2Id(Number(e.target.value))
-            }
-          >
-            <option value="" disabled>
-              — Select a fighter —
-            </option>
-            {characters.map((character) => (
-              <option
-                key={character.character_id}
-                value={character.character_id}
-              >
-                {character.name}
-              </option>
-            ))}
-          </select>
+          <FighterSelect characters={characters} value={fighter2Id} onChange={setFighter2Id} />
         </div>
         <div>
           <button
-            className="border-2 border-scale-ink rounded-lg px-4 py-2 font-body bg-scale-paper text-scale-ink hover:bg-gray-200 transition-colors"
-            disabled={fighter1Id == null || fighter2Id == null}
-            onClick={startFight}
+            className="border-2 border-scale-ink rounded-lg px-4 py-2 font-body bg-scale-paper text-scale-ink hover:bg-gray-200 hover:text-scale-paper transition-colors disabled:opacity-50 disabled:pointer-events-none"
+            disabled={fighter1Id == null || fighter2Id == null || isFighting}
+            onClick={handleFight}
           >
-            Fight!
+            {isFighting ? "Fighting…" : "Fight!"}
           </button>
         </div>
-        {currentHealth && max_health && (
-          <div className="sticky top-0 z-10 bg-scale-paper py-2 flex gap-4">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 justify-center">
-                {fighter1?.image_url && (
-                  <img
-                    src={fighter1.image_url}
-                    alt={fighter1.name}
-                    className="h-10 w-10 sm:h-12 sm:w-12 shrink-0 object-cover object-top rounded-full border-2 border-scale-red"
-                  />
-                )}
-                <span className="truncate">{fighter1?.name}</span>
-              </div>
-              <div className="w-full h-[6px] bg-gray-700 rounded">
-                <div
-                  style={{
-                    width: `${(currentHealth.fighter1 / max_health.fighter1) * 100}%`,
-                  }}
-                  className="h-full bg-scale-red rounded"
-                />
-              </div>
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 justify-center">
-                {fighter2?.image_url && (
-                  <img
-                    src={fighter2.image_url}
-                    alt={fighter2.name}
-                    className="h-10 w-10 sm:h-12 sm:w-12 shrink-0 object-cover object-top rounded-full border-2 border-scale-blue"
-                  />
-                )}
-                <span className="truncate">{fighter2?.name}</span>
-              </div>
-              <div className="w-full h-[6px] bg-gray-700 rounded">
-                <div
-                  style={{
-                    width: `${(currentHealth.fighter2 / max_health.fighter2) * 100}%`,
-                  }}
-                  className="h-full bg-scale-blue rounded"
-                />
-              </div>
-            </div>
-          </div>
+        {currentHealth && maxHealth && (
+          <HealthBars
+            fighter1={fighter1}
+            fighter2={fighter2}
+            currentHealth={currentHealth}
+            maxHealth={maxHealth}
+            lastHit={lastHit}
+          />
         )}
-        <div
-          ref={logReff}
-          className="max-h-[400px] overflow-y-auto flex flex-col gap-2"
-        >
-          {turns.map((turn, i) => (
-            <div
-              key={i}
-              className="border-2 border-scale-ink rounded-2xl px-4 py-3 flex items-center justify-between gap-2 font-body animate-slide-in"
-            >
-              {turn.event === "fight_over" ? (
-                <span className="w-full text-center">
-                  Winner: {turn.winner ?? "Draw"}
-                </span>
-              ) : (
-                <>
-                  <span className="min-w-0 break-words">
-                    {turn.narration ?? `${turn.attacker} hits ${turn.defender}`}
-                  </span>
-                  <span className="shrink-0 font-display text-2xl text-scale-amber">
-                    -{turn.damage_dealt}
-                  </span>
-                </>
-              )}
-            </div>
-          ))}
-        </div>
-        {fighter1Id !== null &&
-          fighter2Id !== null &&
-          turns.some((t) => t.event === "fight_over") && (
-            <VoteWidget characterAId={fighter1Id} characterBId={fighter2Id} />
-          )}
+        <FightLog turns={turns} />
+        {/* Vote on the fighters that actually fought, even if the dropdowns changed since */}
+        {fightOver && fighter1 && fighter2 && (
+          <VoteWidget characterAId={fighter1.character_id} characterBId={fighter2.character_id} />
+        )}
       </div>
     </div>
   );
