@@ -2,7 +2,7 @@ from typing import Iterator
 
 from app.models import character
 import random
-from app.services.narrator import narrate_turn
+from app.services.narrator import narrate_fight
 from app.services.embeddings import retrieve_character_chunks
 import json
 
@@ -14,7 +14,7 @@ def event(payload): return json.dumps(payload) + "\n"
 def format_chunks(chunks):
     return "\n\n".join(chunk[0] for chunk in chunks)
 
-def simulate_turn(attacker: character, defender: character, lore: dict) -> dict:
+def simulate_turn(attacker: character, defender: character) -> dict:
     hit_chance = 0.5 + (attacker.speed / (attacker.speed + defender.speed)) * 0.4
     
 
@@ -31,7 +31,6 @@ def simulate_turn(attacker: character, defender: character, lore: dict) -> dict:
         "is_finishing_blow": False,
         "missed": True
         }
-        turn_outcome["narration"] = narrate_turn(turn_outcome, lore)
         return turn_outcome
 
     
@@ -57,7 +56,6 @@ def simulate_turn(attacker: character, defender: character, lore: dict) -> dict:
         "missed": False 
     }
     
-    turn_outcome["narration"] = narrate_turn(turn_outcome, lore)
     return turn_outcome
 
 def simulate_fight(character1: character, character2: character) -> Iterator[str]:
@@ -67,7 +65,7 @@ def simulate_fight(character1: character, character2: character) -> Iterator[str
     try:
         yield from fight_turns(character1, character2)
     except Exception as e:
-        print(f"Fight interrupted: {e!r}")
+        print(f"Fight interrupted: {e!r}", flush=True)
         yield event({"event": "error", "message": "The fight was interrupted. Please try again in a minute."})
 
 
@@ -86,22 +84,27 @@ def fight_turns(character1: character, character2: character) -> Iterator[str]:
     }
     
     
-    ##turns = []
+    # Work out the whole fight first so it can be narrated in one Gemini request
+    turns = []
     
     while character1.health > 0 and character2.health > 0 and turn_counter < MAX_TURNS:
-        turn_result = simulate_turn(character1, character2, lore)
+        turn_result = simulate_turn(character1, character2)
         character2.health = turn_result["defender_health"]
-        yield event(turn_result)
+        turns.append(turn_result)
         turn_counter += 1
 
         if character2.health <= 0:
             break
         
-        turn_result = simulate_turn(character2, character1, lore)
+        turn_result = simulate_turn(character2, character1)
         character1.health = turn_result["defender_health"]
-        yield event(turn_result)
+        turns.append(turn_result)
         turn_counter += 1
     
+    for turn_result, narration in zip(turns, narrate_fight(turns, lore)):
+        turn_result["narration"] = narration
+        yield event(turn_result)
+
     if character1.health <= 0:
         winner = character2.name
     elif character2.health <= 0:

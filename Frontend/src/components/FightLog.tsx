@@ -29,10 +29,11 @@ function FightLog({ turns }: FightLogProps) {
           ) : (
             <>
               <span className="min-w-0 break-words">
-                {turn.narration ?? `${turn.attacker} hits ${turn.defender}`}
+                {turn.narration ??
+                  `${turn.attacker} ${turn.missed ? "misses" : "hits"} ${turn.defender}`}
               </span>
               <span className="shrink-0 font-display text-2xl text-scale-amber">
-                -{turn.damage_dealt}
+                {turn.missed ? "MISS" : `-${turn.damage_dealt}`}
               </span>
             </>
           )}

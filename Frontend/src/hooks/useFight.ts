@@ -5,9 +5,9 @@ import type { Character, Health, Hit, Side, Turn } from "../types";
 // even when the stream delivers several turns at once.
 const TURN_GAP_MS = 900;
 
-// Give up if the server goes silent this long mid-fight. Generous because one narration
-// can take a while when the backend retries Gemini.
-const WATCHDOG_MS = 60_000;
+// Give up if the server goes silent this long mid-fight. Generous because the backend
+// narrates the whole fight in one Gemini call (up to 45s, plus one retry) before sending turns.
+const WATCHDOG_MS = 100_000;
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -60,7 +60,7 @@ export function useFight() {
       });
       if (!response.ok) throw new Error(`Server responded ${response.status}`);
 
-      // Started only once the server answers, so a Render cold start doesn't trip it
+      // Started only once the server answers, so a slow server start doesn't trip it
       resetWatchdog();
       const reader = response.body!.getReader();
       const decoder = new TextDecoder();

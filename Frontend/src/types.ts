@@ -10,6 +10,7 @@ export type Turn = {
   attacker?: string;
   defender?: string;
   damage_dealt?: number;
+  missed?: boolean;
   defender_health?: number;
   winner?: string | null;
   narration?: string | null;
