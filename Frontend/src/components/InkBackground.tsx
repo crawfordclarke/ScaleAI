@@ -23,9 +23,10 @@ interface InkBackgroundProps {
   fighter1?: Character;
   fighter2?: Character;
   lastHit: Hit | null;
+  isFighting: boolean;
 }
 
-function InkBackground({ fighter1, fighter2, lastHit }: InkBackgroundProps) {
+function InkBackground({ fighter1, fighter2, lastHit, isFighting }: InkBackgroundProps) {
   const [scope, animate] = useAnimate();
   const reduceMotion = useReducedMotion();
   const fighters = { fighter1, fighter2 };
@@ -39,6 +40,12 @@ function InkBackground({ fighter1, fighter2, lastHit }: InkBackgroundProps) {
       animate(`[data-half=${lastHit.defender}] [data-flash]`, { opacity: [0, 0.6, 0] }, { duration: 0.35, delay: 0.15 });
     }
   }, [lastHit, reduceMotion, showFighters, animate]);
+
+  // A bigger burst when the FIGHT! button kicks a fight off
+  useEffect(() => {
+    if (!isFighting || reduceMotion) return;
+    animate("[data-lines]", { scale: [1, 1.3, 1], opacity: [0.5, 1, 0.5] }, { duration: 0.6 });
+  }, [isFighting, reduceMotion, animate]);
 
   return (
     <div ref={scope} aria-hidden className="fixed inset-0 -z-10 overflow-hidden bg-scale-paper">
