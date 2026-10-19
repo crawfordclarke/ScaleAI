@@ -17,7 +17,7 @@ function App() {
   const [selected, setSelected] = useState<Record<Side, number | null>>({ fighter1: null, fighter2: null });
   const [pickerOpen, setPickerOpen] = useState(true);
   const voteRef = useRef<HTMLDivElement>(null);
-  const { turns, maxHealth, currentHealth, fighter1, fighter2, lastHit, isFighting, startFight } =
+  const { turns, maxHealth, currentHealth, fighter1, fighter2, lastHit, isFighting, error, startFight } =
     useFight();
 
   useEffect(() => {
@@ -64,6 +64,18 @@ function App() {
           />
         )}
         <FightLog turns={turns} />
+        {error && (
+          <div role="alert" className="flex flex-col items-center gap-2 rounded-2xl border-2 border-scale-red bg-scale-paper/90 px-4 py-3 font-body">
+            <span>{error}</span>
+            <button
+              type="button"
+              onClick={handleFight}
+              className="rounded-lg border-2 border-scale-ink px-4 py-1 text-sm hover:bg-scale-ink hover:text-scale-paper transition-colors"
+            >
+              Try again
+            </button>
+          </div>
+        )}
         {/* Vote on the fighters that actually fought, even if the picks changed since */}
         <div ref={voteRef}>
           {fightOver && fighter1 && fighter2 && (

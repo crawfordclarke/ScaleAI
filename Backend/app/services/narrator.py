@@ -1,6 +1,6 @@
 import json
 import time
-from google.genai import errors
+from google.genai import errors, types
 from google import genai
 import os
 from dotenv import load_dotenv
@@ -8,9 +8,12 @@ from dotenv import load_dotenv
 load_dotenv()  # Load environment variables from .env file
 
 
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+client = genai.Client(
+    api_key=os.getenv("GEMINI_API_KEY"),
+    http_options=types.HttpOptions(timeout=20_000),  # ms; a hung request shouldn't freeze the fight
+)
 
-def narrate_turn(turn_data: dict, lore: dict) -> str:
+def narrate_turn(turn_data: dict, lore: dict) -> str | None:
     
     attacker = turn_data["attacker"]
     defender = turn_data["defender"]
@@ -48,6 +51,8 @@ def narrate_turn(turn_data: dict, lore: dict) -> str:
     that through what's described, not by asking the reader.
     - Write like the outcome already matters, not like you're trying to convince the reader it does."""
         
+    # Narration is optional: returning None sends the turn without it and the frontend
+    # shows a plain "X hits Y" line instead, so a narrator outage never stalls the fight.
     for attempt in range(3):
         try:
             response = client.models.generate_content(
@@ -55,6 +60,11 @@ def narrate_turn(turn_data: dict, lore: dict) -> str:
                 contents=prompt
             )
             return response.text
-        except errors.APIError:
-            time.sleep(15)
-    raise Exception("narration failed after 3 attempts")
+        except errors.ClientError as e:
+            print(f"Narration skipped ({e.code} {e.status}): {e.message}")
+            return None  # 429 quota etc. — fail fast, retrying won't help
+        except Exception as e:
+            print(f"Narration attempt {attempt + 1} failed: {e!r}")
+            if attempt < 2:
+                time.sleep(2 ** attempt)  # 1s, 2s
+    return None

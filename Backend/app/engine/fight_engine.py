@@ -62,7 +62,17 @@ def simulate_turn(attacker: character, defender: character, lore: dict) -> dict:
 
 def simulate_fight(character1: character, character2: character) -> Iterator[str]:
     yield event({"event": "fight_start", "fighter1": character1.name, "fighter1_max_health": character1.max_health, "fighter2": character2.name, "fighter2_max_health": character2.max_health})
-    
+
+    # The response status is already sent once streaming starts, so failures have to go out as an event
+    try:
+        yield from fight_turns(character1, character2)
+    except Exception as e:
+        print(f"Fight interrupted: {e!r}")
+        yield event({"event": "error", "message": "The fight was interrupted. Please try again in a minute."})
+
+
+def fight_turns(character1: character, character2: character) -> Iterator[str]:
+
     
     
     MAX_TURNS = 50  # Prevent infinite loops in case of a bug

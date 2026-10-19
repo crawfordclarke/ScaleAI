@@ -12,7 +12,8 @@ export type Turn = {
   damage_dealt?: number;
   defender_health?: number;
   winner?: string | null;
-  narration?: string;
+  narration?: string | null;
+  message?: string;
   fighter1?: string;
   fighter1_max_health?: number;
   fighter2?: string;
